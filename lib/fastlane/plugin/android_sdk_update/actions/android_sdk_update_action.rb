@@ -24,6 +24,19 @@ module Fastlane
               command: "/usr/bin/unzip /tmp/android-sdk-tools.zip -d #{sdk_path}",
               print_all: true, print_command: true)
           end
+        elsif FastlaneCore::Helper.windows?
+          sdk_path = File.expand_path(params[:windows_sdk_install_dir])
+          if File.exist("#{sdk_path}/tools/sdkmanager")
+            UI.message("Using existing android-sdk at #{sdk_path}")
+          else
+            UI.message("Downloading android-sdk to #{sdk_path}")
+            FastlaneCore::CommandExecutor.execute(
+              command: "powershell -Command \"{wget -OutFile %TEMP%\\android-sdk-tools.zip #{params[:windows_sdk_download_url]}}\"",
+              print_all: true, print_command: true)
+            FastlaneCore::CommandExecutor.execute(
+              command: "powershell -Command \"{Expand-Archive %TEMP%\\android-sdk-tools.zip -DestinationPath #{sdk_path}}\"",
+              print_all: true, print_command: true)
+          end
         else
           UI.user_error! 'Your OS is currently not supported.'
         end
